@@ -4,7 +4,7 @@ let weights = null;
 
 async function loadWeights() {
     try {
-        const response = await fetch('model_weights.json');
+        const response = await fetch('model_weights.json?v=' + Date.now());
         weights = await response.json();
     } catch (e) {
         console.error("Failed to load weights.", e);
@@ -109,10 +109,11 @@ async function visualize() {
     // Step 0: Explain Model
     let html = generateStepHTML(
         "🧠 1. This is our Model!",
-        "An AI model isn't magic; it's literally just a bunch of memory grids (called Matrices) filled with numbers! These numbers are called <strong>Weights</strong> and <strong>Biases</strong>. During training, the computer tweaked these numbers thousands of times until they accurately represented mathematical rules. Here are the EXACT numbers holding the memory inside our model right now:",
-        `${renderMatrix("Weight 1 [6x8]", weights.fc1_w, true)}
-         ${renderMatrix("Weight 2 [8x8]", weights.fc2_w, true)}
-         ${renderMatrix("Weight Out [8x1]", weights.out_w, true)}`
+        "An AI model isn't magic; it's literally just a bunch of memory grids (called Matrices) filled with numbers! These numbers are called <strong>Weights</strong> and <strong>Biases</strong>. During training, the computer tweaked these numbers thousands of times until they accurately represented mathematical rules. Our model has <strong>3 hidden layers with 32 neurons each</strong>.",
+        `${renderMatrix("Weight 1 [6×32]", weights.fc1_w, true)}
+         ${renderMatrix("Weight 2 [32×32]", weights.fc2_w, true)}
+         ${renderMatrix("Weight 3 [32×32]", weights.fc3_w, true)}
+         ${renderMatrix("Weight Out [32×1]", weights.out_w, true)}`
     );
 
     // Step 1: Explain Input
@@ -126,23 +127,23 @@ async function visualize() {
     html += generateStepHTML(
         "⚙️ 3. Step 1: Converting to Math Tokens",
         `We must parse your input into a numeric grid. We put <strong>${var1}</strong> at the start, and <strong>${var2}</strong> at the end. For the operator, we use a 4-slot switch called "One-Hot Encoding" [Plus, Minus, Multiply, Divide]. Since you chose your operator, we put a <code>1</code> in its slot and <code>0</code> in the others!`,
-        `${renderMatrix("Input Matrix X [1x6]", currentX)}`
+        `${renderMatrix("Input Matrix X [1×6]", currentX)}`
     );
     
     // Layer 1 Linear
     const z1 = matmul(currentX, weights.fc1_w, weights.fc1_b);
     html += generateStepHTML(
-        "🔢 4. Step 2: Layer 1 'Thinking' (Multiplication)",
-        `The AI is now processing your request. It takes your Input Matrix and multiplies it against the first weight memory grid. Think of this like asking 8 different questions about your numbers simultaneously. Finally, it adds the <strong>Bias</strong> (a little padding adjustment) to get the raw thoughts (Z1)!`,
+        "🔢 4. Step 2: Layer 1 'Thinking'",
+        `The AI multiplies your Input against the first weight grid (6×32). Think of this like asking 32 different questions about your numbers simultaneously. The <strong>Bias</strong> is a padding adjustment added to each result.`,
         `${renderMatrix("X", currentX)} <div class="op-char">·</div> ${renderMatrix("W1^T", weights.fc1_w, true)} <div class="op-char">+</div> ${renderMatrix("B1", weights.fc1_b)} <div class="op-char">=</div> ${renderMatrix("Z1", z1)}`
     );
     
     // Layer 1 Activation (ReLU)
     const a1 = relu(z1);
     html += generateStepHTML(
-        "🛡️ 5. Step 3: Layer 1 Activation (Making Choices)",
-        `Look closely at the <strong>Z1</strong> matrix above. See any negative numbers? The AI uses a filter called <strong>ReLU</strong> (Rectified Linear Unit), which strictly deletes any number below zero. This is how the AI "makes choices" and drops useless information!`,
-        `<div style="color:var(--text-secondary); font-size: 1.2rem;">ReLU (</div>${renderMatrix("Z1", z1)}<div style="color:var(--text-secondary); font-size: 1.2rem;">)</div><div class="op-char">=</div>${renderMatrix("A1 (Choices)", a1)}`
+        "🛡️ 5. Step 3: Layer 1 Activation (ReLU)",
+        `The AI uses <strong>ReLU</strong> to delete any negative numbers. This is how the AI "makes choices" — it drops useless information!`,
+        `<div style="color:var(--text-secondary); font-size: 1.2rem;">ReLU (</div>${renderMatrix("Z1", z1)}<div style="color:var(--text-secondary); font-size: 1.2rem;">)</div><div class="op-char">=</div>${renderMatrix("A1", a1)}`
     );
     
     currentX = a1;
@@ -151,7 +152,7 @@ async function visualize() {
     const z2 = matmul(currentX, weights.fc2_w, weights.fc2_b);
     html += generateStepHTML(
         "🧠 6. Step 4: Layer 2 Deep Thinking",
-        `Now the AI takes the filtered choices (A1) from the previous step, and rubs them against the next memory grid (W2). This combination creates complex logic, figuring out exactly what math operation you wanted.`,
+        `The AI takes the filtered choices (A1) and multiplies them against the second weight grid. This combination builds more complex mathematical logic.`,
         `${renderMatrix("A1", currentX)} <div class="op-char">·</div> ${renderMatrix("W2^T", weights.fc2_w, true)} <div class="op-char">+</div> ${renderMatrix("B2", weights.fc2_b)} <div class="op-char">=</div> ${renderMatrix("Z2", z2)}`
     );
     
@@ -159,18 +160,41 @@ async function visualize() {
     const a2 = relu(z2);
     html += generateStepHTML(
         "🛡️ 7. Step 5: Layer 2 Activation",
-        `Again, any negative 'bad thoughts' are instantly clamped to zero!`,
-        `<div style="color:var(--text-secondary); font-size: 1.2rem;">ReLU (</div>${renderMatrix("Z2", z2)}<div style="color:var(--text-secondary); font-size: 1.2rem;">)</div><div class="op-char">=</div>${renderMatrix("A2 (Choices)", a2)}`
+        `Again, negative signals are clamped to zero!`,
+        `<div style="color:var(--text-secondary); font-size: 1.2rem;">ReLU (</div>${renderMatrix("Z2", z2)}<div style="color:var(--text-secondary); font-size: 1.2rem;">)</div><div class="op-char">=</div>${renderMatrix("A2", a2)}`
     );
     
     currentX = a2;
     
-    // Output Layer
-    const out = matmul(currentX, weights.out_w, weights.out_b);
+    // Layer 3 Linear
+    const z3 = matmul(currentX, weights.fc3_w, weights.fc3_b);
     html += generateStepHTML(
-        "🎯 8. Step 6: Final Prediction (Output)",
-        `We made it! The AI takes its profound 8-number thought (A2) and squeezes it down into a single final answer by multiplying it via the final small weight grid. The resulting number is what the AI predicts the mathematical answer is!`,
-        `${renderMatrix("A2", currentX)} <div class="op-char">·</div> ${renderMatrix("Output Weights", weights.out_w, true)} <div class="op-char">+</div> ${renderMatrix("Output Bias", weights.out_b)} <div class="op-char">=</div> ${renderMatrix("Final Prediction", out)}`
+        "🧠 8. Step 6: Layer 3 — Even Deeper",
+        `A third layer of processing! More neurons means more "rulers" to approximate complex curves like multiplication. This is WHY bigger networks are smarter.`,
+        `${renderMatrix("A2", currentX)} <div class="op-char">·</div> ${renderMatrix("W3^T", weights.fc3_w, true)} <div class="op-char">+</div> ${renderMatrix("B3", weights.fc3_b)} <div class="op-char">=</div> ${renderMatrix("Z3", z3)}`
+    );
+    
+    const a3 = relu(z3);
+    html += generateStepHTML(
+        "🛡️ 9. Step 7: Layer 3 Activation",
+        `Final filter before the output — clamping negatives one last time.`,
+        `<div style="color:var(--text-secondary); font-size: 1.2rem;">ReLU (</div>${renderMatrix("Z3", z3)}<div style="color:var(--text-secondary); font-size: 1.2rem;">)</div><div class="op-char">=</div>${renderMatrix("A3", a3)}`
+    );
+    
+    currentX = a3;
+    
+    // Output Layer
+    const out_raw = matmul(currentX, weights.out_w, weights.out_b);
+    
+    // Denormalize: real_output = raw_output * y_std + y_mean
+    const y_mean = weights.__metadata__.y_mean;
+    const y_std = weights.__metadata__.y_std;
+    const out_real = [out_raw[0] * y_std + y_mean];
+    
+    html += generateStepHTML(
+        "🎯 10. Step 8: Final Prediction (Output + Denormalization)",
+        `The AI squeezes its 32 thoughts down to a single number. But during training, we <strong>normalized</strong> the outputs (scaled them to a small range for easier learning). Now we reverse this: <code>real_answer = raw_output × ${y_std.toFixed(2)} + ${y_mean.toFixed(2)}</code>`,
+        `${renderMatrix("A3", currentX)} <div class="op-char">·</div> ${renderMatrix("W_out^T", weights.out_w, true)} <div class="op-char">+</div> ${renderMatrix("B_out", weights.out_b)} <div class="op-char">=</div> ${renderMatrix("Raw Output", out_raw)} <div class="op-char">→</div> ${renderMatrix("Real Answer", out_real)}`
     );
 
     traceDiv.innerHTML = html;
@@ -188,12 +212,12 @@ async function visualize() {
             if (i === cards.length - 1) {
                 cards[i].scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
-        }, i * 600); // 600ms stagger between math steps
+        }, i * 400);
         
         cards[i].style.transform = 'translateY(20px)';
     }
     
-    document.getElementById('final-result').innerText = out[0].toFixed(4);
+    document.getElementById('final-result').innerText = out_real[0].toFixed(2);
 }
 
 document.getElementById('calc-btn').addEventListener('click', visualize);

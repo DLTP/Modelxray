@@ -4,7 +4,7 @@ let timeline = null;
 
 async function loadTimeline() {
     try {
-        const response = await fetch('training_timeline.json');
+        const response = await fetch('training_timeline.json?v=' + Date.now());
         timeline = await response.json();
         console.log("Training timeline loaded!");
         showSnapshot('initial');
@@ -113,11 +113,13 @@ function showSnapshot(stepKey) {
     
     // Render weight matrices
     matDiv.innerHTML = 
-        renderMatrix("Weight 1 [6×8]", snap.fc1_w, true) +
-        renderMatrix("Bias 1 [1×8]", snap.fc1_b) +
-        renderMatrix("Weight 2 [8×8]", snap.fc2_w, true) +
-        renderMatrix("Bias 2 [1×8]", snap.fc2_b) +
-        renderMatrix("Weight Out [8×1]", snap.out_w, true) +
+        renderMatrix("Weight 1 [6×32]", snap.fc1_w, true) +
+        renderMatrix("Bias 1 [1×32]", snap.fc1_b) +
+        renderMatrix("Weight 2 [32×32]", snap.fc2_w, true) +
+        renderMatrix("Bias 2 [1×32]", snap.fc2_b) +
+        (snap.fc3_w ? renderMatrix("Weight 3 [32×32]", snap.fc3_w, true) : '') +
+        (snap.fc3_b ? renderMatrix("Bias 3 [1×32]", snap.fc3_b) : '') +
+        renderMatrix("Weight Out [32×1]", snap.out_w, true) +
         renderMatrix("Bias Out [1×1]", snap.out_b);
     
     // Update active button
@@ -137,6 +139,8 @@ function showDiff() {
         renderDiffMatrix("ΔBias 1", initial.fc1_b, final.fc1_b) +
         renderDiffMatrix("ΔWeight 2", initial.fc2_w, final.fc2_w, true) +
         renderDiffMatrix("ΔBias 2", initial.fc2_b, final.fc2_b) +
+        (initial.fc3_w && final.fc3_w ? renderDiffMatrix("ΔWeight 3", initial.fc3_w, final.fc3_w, true) : '') +
+        (initial.fc3_b && final.fc3_b ? renderDiffMatrix("ΔBias 3", initial.fc3_b, final.fc3_b) : '') +
         renderDiffMatrix("ΔWeight Out", initial.out_w, final.out_w, true) +
         renderDiffMatrix("ΔBias Out", initial.out_b, final.out_b);
 }
