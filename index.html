@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Math Trace - Exact Matrices</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link active">🔢 Calculator</a>
+            <a href="tutorial.html" class="nav-link">📖 How It Works</a>
+        </nav>
+
+        <header>
+            <h1>Under the Hood: Real AI Math</h1>
+            <p>See exactly how the PyTorch dot-products work layer by layer.</p>
+        </header>
+
+        <div class="control-panel">
+            <div class="input-group">
+                <input type="number" id="var1" value="10" placeholder="Var 1">
+                <select id="op">
+                    <option value="p">+</option>
+                    <option value="s">-</option>
+                    <option value="m">*</option>
+                    <option value="d">/</option>
+                </select>
+                <input type="number" id="var2" value="5" placeholder="Var 2">
+            </div>
+            <button id="calc-btn">Calculate Matrices</button>
+            
+            <div class="result-display">
+                <span class="label">Result:</span>
+                <span id="final-result" class="value">--</span>
+            </div>
+        </div>
+
+        <div class="math-trace" id="math-trace">
+            <!-- Matrices will be rendered here dynamically -->
+            <div class="placeholder-text">Click "Calculate Matrices" to trace the math.</div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

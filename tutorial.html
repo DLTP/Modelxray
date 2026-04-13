@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How We Built This AI - Tutorial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">🔢 Calculator</a>
+            <a href="tutorial.html" class="nav-link active">📖 How It Works</a>
+        </nav>
+
+        <header>
+            <h1>How We Built This AI Model</h1>
+            <p>A step-by-step walkthrough of how a Neural Network learns to be a calculator.</p>
+        </header>
+
+        <!-- SECTION 1: Why this architecture? -->
+        <div class="step-card">
+            <div class="step-header">📐 1. Deciding the Model Size</div>
+            <div class="explanation-box">
+                Before writing any code, we need to decide: <strong>How big should our AI's brain be?</strong><br><br>
+                Our calculator takes 3 inputs: <strong>Number 1</strong>, an <strong>Operator</strong> (+, -, *, /), and <strong>Number 2</strong>.<br><br>
+                But wait — we can't just feed the operator as a letter. AI models only understand numbers!
+                So we encode the operator as 4 separate slots using a technique called <strong>One-Hot Encoding</strong>:
+                <ul>
+                    <li><code>+</code> becomes <code>[1, 0, 0, 0]</code></li>
+                    <li><code>-</code> becomes <code>[0, 1, 0, 0]</code></li>
+                    <li><code>*</code> becomes <code>[0, 0, 1, 0]</code></li>
+                    <li><code>/</code> becomes <code>[0, 0, 0, 1]</code></li>
+                </ul>
+                So our total input is: <code>[Num1, op_plus, op_minus, op_mul, op_div, Num2]</code> = <strong>6 numbers</strong>.<br><br>
+                That means our <strong>Input Layer has 6 neurons</strong>.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🤔 2. Why One-Hot Encoding?</div>
+            <div class="explanation-box">
+                <strong>Why can't we just use 1 for +, 2 for -, 3 for *, 4 for /?</strong><br><br>
+                Great question! If we did that, the AI would think <code>*</code> (3) is "bigger" or "more important" than <code>+</code> (1). 
+                It would also think <code>/</code> (4) is somehow "close to" <code>*</code> (3).<br><br>
+                One-Hot Encoding treats every operator as <strong>completely independent</strong>. 
+                No operator is "bigger" than another. Each operator gets its own dedicated on/off switch.<br><br>
+                This is the standard technique used in ChatGPT, image classifiers, and nearly every AI model in production today!
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🧱 3. Why 8 Hidden Neurons?</div>
+            <div class="explanation-box">
+                Our architecture is: <strong>Input[6] → Hidden[8] → Hidden[8] → Output[1]</strong><br><br>
+                <strong>Why 8?</strong> The hidden layers are where the AI does its "thinking." 
+                Each neuron in a hidden layer is like a tiny expert that learns one specific pattern.<br><br>
+                <ul>
+                    <li><strong>Too few neurons (e.g. 2)?</strong> The AI can't learn complex patterns like multiplication.</li>
+                    <li><strong>Too many neurons (e.g. 256)?</strong> Works great, but the matrices become unreadable on screen! Also wastes memory.</li>
+                    <li><strong>8 neurons?</strong> Perfect balance — enough capacity to learn 4 operations, small enough to display the actual numbers in every cell.</li>
+                </ul>
+                In production AI, models use thousands or millions of neurons. But the math is <em>exactly the same</em> — just bigger grids!
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🎲 4. What Does the Code Look Like?</div>
+            <div class="explanation-box">
+                Here is the actual Python code that defines our entire model. That's it — just 6 lines!
+            </div>
+            <pre class="code-block">
+<span class="code-keyword">class</span> <span class="code-class">CalcNet</span>(nn.Module):
+    <span class="code-keyword">def</span> __init__(self):
+        self.fc1 = nn.Linear(<span class="code-num">6</span>, <span class="code-num">8</span>)    <span class="code-comment"># Input → Hidden 1 (6×8 weight matrix)</span>
+        self.fc2 = nn.Linear(<span class="code-num">8</span>, <span class="code-num">8</span>)    <span class="code-comment"># Hidden 1 → Hidden 2 (8×8 weight matrix)</span>
+        self.out = nn.Linear(<span class="code-num">8</span>, <span class="code-num">1</span>)    <span class="code-comment"># Hidden 2 → Output (8×1 weight matrix)</span>
+        self.relu = nn.ReLU()           <span class="code-comment"># Activation: kill negatives</span>
+
+    <span class="code-keyword">def</span> forward(self, x):
+        x = self.relu(self.fc1(x))     <span class="code-comment"># Step 1: Multiply + filter</span>
+        x = self.relu(self.fc2(x))     <span class="code-comment"># Step 2: Multiply + filter</span>
+        <span class="code-keyword">return</span> self.out(x)              <span class="code-comment"># Step 3: Final answer</span>
+            </pre>
+        </div>
+
+        <!-- SECTION 2: Watch the training evolve -->
+        <div class="step-card">
+            <div class="step-header">🔬 5. Watch the Matrices Evolve During Training!</div>
+            <div class="explanation-box">
+                Below you can see the <strong>exact weight numbers</strong> at different stages of training.<br>
+                Use the buttons to switch between snapshots and watch how the random initial values slowly transform into meaningful calculator logic!
+            </div>
+
+            <div class="timeline-controls" id="timeline-controls">
+                <button class="timeline-btn active" data-step="initial">🎲 Initial (Random)</button>
+                <button class="timeline-btn" data-step="after_row1">📝 After Row 1</button>
+                <button class="timeline-btn" data-step="after_row2">📝 After Row 2</button>
+                <button class="timeline-btn" data-step="final">🎯 Final (Trained)</button>
+            </div>
+
+            <div id="snapshot-info" class="snapshot-info"></div>
+            <div id="snapshot-matrices" class="math-eq"></div>
+        </div>
+
+        <!-- SECTION 3: Weight diff viewer -->
+        <div class="step-card">
+            <div class="step-header">📊 6. What Changed? (Weight Comparison)</div>
+            <div class="explanation-box">
+                This panel highlights <strong>exactly which numbers changed</strong> between the Initial random state and the Final trained state.
+                <br>Green cells moved up. Red cells moved down.
+            </div>
+            <div id="diff-view" class="math-eq"></div>
+        </div>
+
+    </div>
+    
+    <script src="tutorial.js"></script>
+</body>
+</html>
