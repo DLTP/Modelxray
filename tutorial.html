@@ -11,86 +11,131 @@
     <div class="container">
         <nav class="nav-bar">
             <a href="index.html" class="nav-link">🔢 Calculator</a>
-            <a href="tutorial.html" class="nav-link active">📖 How It Works</a>
+            <a href="tutorial.html" class="nav-link active">📖 Neural Net 101</a>
+            <a href="concepts.html" class="nav-link">🧩 AI Concepts</a>
         </nav>
 
         <header>
             <h1>How We Built This AI Model</h1>
-            <p>A step-by-step walkthrough of how a Neural Network learns to be a calculator.</p>
+            <p>A step-by-step walkthrough of how a Neural Network learns to be a calculator, from data to final answer.</p>
         </header>
 
-        <!-- SECTION 1: Why this architecture? -->
         <div class="step-card">
-            <div class="step-header">📐 1. Deciding the Model Size</div>
+            <div class="step-header">🧾 1. What is our training data?</div>
             <div class="explanation-box">
-                Before writing any code, we need to decide: <strong>How big should our AI's brain be?</strong><br><br>
-                Our calculator takes 3 inputs: <strong>Number 1</strong>, an <strong>Operator</strong> (+, -, *, /), and <strong>Number 2</strong>.<br><br>
-                But wait — we can't just feed the operator as a letter. AI models only understand numbers!
-                So we encode the operator as 4 separate slots using a technique called <strong>One-Hot Encoding</strong>:
+                The model learns from examples. Each row of <code>calculator_data.csv</code> contains a pair of numbers, an operator, and the correct result.
+                This is called a <strong>training example</strong>.<br><br>
+                In our tutorial, a single example looks like:
                 <ul>
-                    <li><code>+</code> becomes <code>[1, 0, 0, 0]</code></li>
-                    <li><code>-</code> becomes <code>[0, 1, 0, 0]</code></li>
-                    <li><code>*</code> becomes <code>[0, 0, 1, 0]</code></li>
-                    <li><code>/</code> becomes <code>[0, 0, 0, 1]</code></li>
+                    <li><strong>Input:</strong> <code>[Var1, +, -, *, /, Var2]</code></li>
+                    <li><strong>Output:</strong> <code>[Result]</code></li>
                 </ul>
-                So our total input is: <code>[Num1, op_plus, op_minus, op_mul, op_div, Num2]</code> = <strong>6 numbers</strong>.<br><br>
-                That means our <strong>Input Layer has 6 neurons</strong>.
+                For example, if the question is <code>7 * 8</code>, the input becomes <code>[7, 0, 0, 1, 0, 8]</code> and the target output is <code>[56]</code>.
             </div>
         </div>
 
         <div class="step-card">
-            <div class="step-header">🤔 2. Why One-Hot Encoding?</div>
+            <div class="step-header">📐 2. How is the model built?</div>
             <div class="explanation-box">
-                <strong>Why can't we just use 1 for +, 2 for -, 3 for *, 4 for /?</strong><br><br>
-                Great question! If we did that, the AI would think <code>*</code> (3) is "bigger" or "more important" than <code>+</code> (1). 
-                It would also think <code>/</code> (4) is somehow "close to" <code>*</code> (3).<br><br>
-                One-Hot Encoding treats every operator as <strong>completely independent</strong>. 
-                No operator is "bigger" than another. Each operator gets its own dedicated on/off switch.<br><br>
-                This is the standard technique used in ChatGPT, image classifiers, and nearly every AI model in production today!
-            </div>
-        </div>
-
-        <div class="step-card">
-            <div class="step-header">🧱 3. Why 8 Hidden Neurons?</div>
-            <div class="explanation-box">
-                Our architecture is: <strong>Input[6] → Hidden[8] → Hidden[8] → Output[1]</strong><br><br>
-                <strong>Why 8?</strong> The hidden layers are where the AI does its "thinking." 
-                Each neuron in a hidden layer is like a tiny expert that learns one specific pattern.<br><br>
+                The model is a small neural network made of four linear layers.
+                Its full shape is:
+                <strong>Input[6] → Linear[32] → ReLU → Linear[32] → ReLU → Linear[32] → ReLU → Linear[1] → Output</strong>.<br><br>
+                That means:
                 <ul>
-                    <li><strong>Too few neurons (e.g. 2)?</strong> The AI can't learn complex patterns like multiplication.</li>
-                    <li><strong>Too many neurons (e.g. 256)?</strong> Works great, but the matrices become unreadable on screen! Also wastes memory.</li>
-                    <li><strong>8 neurons?</strong> Perfect balance — enough capacity to learn 4 operations, small enough to display the actual numbers in every cell.</li>
+                    <li><strong>6 inputs</strong>: the two numbers and the one-hot operator.</li>
+                    <li><strong>32 neurons</strong> in each hidden layer.</li>
+                    <li><strong>1 output</strong>: the predicted calculator result.</li>
                 </ul>
-                In production AI, models use thousands or millions of neurons. But the math is <em>exactly the same</em> — just bigger grids!
+                The model learns by adjusting the values inside the matrices called <strong>weights</strong> and the numbers called <strong>biases</strong>.
             </div>
         </div>
 
         <div class="step-card">
-            <div class="step-header">🎲 4. What Does the Code Look Like?</div>
+            <div class="step-header">🤔 3. Why the operator is one-hot encoded</div>
             <div class="explanation-box">
-                Here is the actual Python code that defines our entire model. That's it — just 6 lines!
+                The operator is not a number like 1, 2, 3, 4. Instead, we use one-hot encoding:
+                <ul>
+                    <li><code>+</code> = <code>[1, 0, 0, 0]</code></li>
+                    <li><code>-</code> = <code>[0, 1, 0, 0]</code></li>
+                    <li><code>*</code> = <code>[0, 0, 1, 0]</code></li>
+                    <li><code>/</code> = <code>[0, 0, 0, 1]</code></li>
+                </ul>
+                This tells the model exactly which operator is active without giving it a false notion of order.
+                In C/C++ terms, it is like turning a single enum into four independent boolean flags.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🧠 4. How training works</div>
+            <div class="explanation-box">
+                Training is the process of making the model's output match the correct answer.
+                For each training example we do:
+                <ol>
+                    <li><strong>Forward pass:</strong> compute the prediction from the input.</li>
+                    <li><strong>Compute loss:</strong> compare the prediction to the real result.</li>
+                    <li><strong>Backward pass:</strong> calculate how to change each weight.</li>
+                    <li><strong>Update weights:</strong> adjust the numbers a little bit.</li>
+                </ol>
+                Over many examples and many epochs, the model learns the full rules of addition, subtraction, multiplication and division.
             </div>
             <pre class="code-block">
-<span class="code-keyword">class</span> <span class="code-class">CalcNet</span>(nn.Module):
-    <span class="code-keyword">def</span> __init__(self):
-        self.fc1 = nn.Linear(<span class="code-num">6</span>, <span class="code-num">8</span>)    <span class="code-comment"># Input → Hidden 1 (6×8 weight matrix)</span>
-        self.fc2 = nn.Linear(<span class="code-num">8</span>, <span class="code-num">8</span>)    <span class="code-comment"># Hidden 1 → Hidden 2 (8×8 weight matrix)</span>
-        self.out = nn.Linear(<span class="code-num">8</span>, <span class="code-num">1</span>)    <span class="code-comment"># Hidden 2 → Output (8×1 weight matrix)</span>
-        self.relu = nn.ReLU()           <span class="code-comment"># Activation: kill negatives</span>
-
-    <span class="code-keyword">def</span> forward(self, x):
-        x = self.relu(self.fc1(x))     <span class="code-comment"># Step 1: Multiply + filter</span>
-        x = self.relu(self.fc2(x))     <span class="code-comment"># Step 2: Multiply + filter</span>
-        <span class="code-keyword">return</span> self.out(x)              <span class="code-comment"># Step 3: Final answer</span>
+for (int epoch = 0; epoch < 20000; epoch++) {
+    tensor y_pred = model.forward(X);
+    tensor loss = mse(y_pred, Y_norm);
+    optimizer.zero_grad();
+    loss.backward();
+    optimizer.step();
+}
             </pre>
         </div>
 
-        <!-- SECTION 2: Watch the training evolve -->
         <div class="step-card">
-            <div class="step-header">🔬 5. Watch the Matrices Evolve During Training!</div>
+            <div class="step-header">🔧 5. Why normalize the output?</div>
             <div class="explanation-box">
-                Below you can see the <strong>exact weight numbers</strong> at different stages of training.<br>
-                Use the buttons to switch between snapshots and watch how the random initial values slowly transform into meaningful calculator logic!
+                The training code scales the target answers before learning. This is called <strong>normalization</strong>.
+                It helps the model learn faster and more stably when answers span a wide range.<br><br>
+                In the tutorial code, the final result is recovered by undoing the scale:
+                <code>real_answer = raw_output * y_std + y_mean</code>.
+                The web calculator does the same during inference.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">💻 6. This is the exact Python model</div>
+            <div class="explanation-box">
+                This is the real model used in <code>train.py</code>. It is not a simplified placeholder — it matches the weights the web app loads.
+            </div>
+            <pre class="code-block">
+class CalcNet(nn.Module):
+    def __init__(self):
+        super(CalcNet, self).__init__()
+        self.fc1 = nn.Linear(6, 32)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(32, 32)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(32, 32)
+        self.relu3 = nn.ReLU()
+        self.out = nn.Linear(32, 1)
+
+    def forward(self, x):
+        x = self.relu1(self.fc1(x))
+        x = self.relu2(self.fc2(x))
+        x = self.relu3(self.fc3(x))
+        return self.out(x)
+            </pre>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🔬 7. Watch the training evolve</div>
+            <div class="explanation-box">
+                The weights start as random numbers. The tutorial timeline shows how the numbers move after:
+                <ul>
+                    <li><strong>Initial:</strong> random initialization.</li>
+                    <li><strong>After Row 1:</strong> learning from the first example.</li>
+                    <li><strong>After Row 2:</strong> learning from a second example.</li>
+                    <li><strong>Final:</strong> after full training on the whole dataset.</li>
+                </ul>
+                This is the most visible part of the tutorial: you can literally watch the model's memory change.
             </div>
 
             <div class="timeline-controls" id="timeline-controls">
@@ -104,18 +149,16 @@
             <div id="snapshot-matrices" class="math-eq"></div>
         </div>
 
-        <!-- SECTION 3: Weight diff viewer -->
         <div class="step-card">
-            <div class="step-header">📊 6. What Changed? (Weight Comparison)</div>
+            <div class="step-header">📊 8. What changed between start and finish?</div>
             <div class="explanation-box">
-                This panel highlights <strong>exactly which numbers changed</strong> between the Initial random state and the Final trained state.
-                <br>Green cells moved up. Red cells moved down.
+                The weight diff viewer highlights how the network's memory was updated during training.
+                Green values increased, red values decreased, and small changes show refinement.
             </div>
             <div id="diff-view" class="math-eq"></div>
         </div>
 
     </div>
-    
     <script src="tutorial.js"></script>
 </body>
 </html>

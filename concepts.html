@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concepts Explorer - Modelxray</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .interactive-demo {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .tree-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 100px;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 255, 204, 0.05);
+            border-radius: 8px;
+        }
+        .tree-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 5px var(--accent-glow));
+            transition: all 0.3s ease;
+        }
+        .matrix-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .layer-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .neuron {
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .encoding-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .encoding-table th, .encoding-table td {
+            border: 1px solid var(--glass-border);
+            padding: 10px;
+            text-align: center;
+        }
+        .encoding-cell {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            border: 1px solid var(--accent);
+            margin: 2px;
+            line-height: 30px;
+            font-family: 'Fira Code', monospace;
+        }
+        .encoding-cell.active {
+            background: var(--accent);
+            color: var(--bg-color);
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .stat-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent);
+            color: var(--bg-color);
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">🔢 Calculator</a>
+            <a href="tutorial.html" class="nav-link">📖 Neural Net 101</a>
+            <a href="concepts.html" class="nav-link active">🧩 AI Concepts</a>
+        </nav>
+
+        <header>
+            <h1>AI Concepts Explorer</h1>
+            <p>Demystifying the common building blocks of Artificial Intelligence.</p>
+        </header>
+
+        <div class="step-card">
+            <div class="step-header">🦁 1. The AI Zoo</div>
+            <div class="explanation-box">
+                AI is not a single machine. It is a family of methods with different strengths.
+                Our calculator is a form of <strong>supervised learning</strong> — the model learns from examples where the correct answer is already known.
+            </div>
+            <div class="concept-grid">
+                <div class="step-card">
+                    <div class="step-header" style="font-size: 1.1rem;">Supervised Learning</div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Learn from labeled examples. The calculator sees inputs like <code>[7, 0, 0, 1, 0, 8]</code> and the answer <code>56</code>.
+                        <em>Examples: regression, classification, calculator models.</em>
+                    </p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" style="font-size: 1.1rem;">Unsupervised Learning</div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Find hidden structure without answers. The system groups or compresses data on its own.
+                        <em>Examples: clustering, dimensionality reduction.</em>
+                    </p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" style="font-size: 1.1rem;">Generative AI</div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Create new content from patterns learned in data. The model becomes a writer, artist, or composer.
+                        <em>Examples: ChatGPT, image generators.</em>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">⚙️ 2. What is a training example?</div>
+            <div class="explanation-box">
+                A training example is a single row of data: input plus expected output.
+                For the calculator, the input is three pieces of information and the output is the correct result.
+            </div>
+            <table class="encoding-table">
+                <tr><th>Var1</th><th>+</th><th>-</th><th>*</th><th>/</th><th>Var2</th><th>Result</th></tr>
+                <tr><td>7</td><td>0</td><td>0</td><td>1</td><td>0</td><td>8</td><td>56</td></tr>
+            </table>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">
+                That table is already the exact format used by the model. It is not a mysterious black box — it is just numbers.
+            </p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🧠 3. The model is just weights and biases</div>
+            <div class="explanation-box">
+                The neural network stores its learned knowledge in two kinds of arrays:
+                <ul>
+                    <li><strong>Weights</strong>: the main numbers that connect one layer to the next.</li>
+                    <li><strong>Biases</strong>: extra offsets that help the network shift its outputs.</li>
+                </ul>
+                In C/C++ terms, these are like <code>float w1[32][6]</code>, <code>float b1[32]</code>, and so on.
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                During inference, the computer performs a few loops of multiply-add operations, just like matrix math in C.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">💻 4. C/C++-style inference walkthrough</div>
+            <div class="explanation-box">
+                Here is a simplified C-style version of the same math the web app does when it predicts a result.
+                It shows how the weights and activations are stored and how the output is computed.
+            </div>
+            <pre class="code-block">
+// input vector: [x0, op_plus, op_minus, op_mul, op_div, x1]
+float x[6] = {var1, op_plus, op_minus, op_mul, op_div, var2};
+
+// hidden layer outputs
+float a1[32];
+float a2[32];
+float a3[32];
+
+// Layer 1: input -> hidden
+for (int i = 0; i < 32; i++) {
+    float sum = b1[i];
+    for (int j = 0; j < 6; j++) {
+        sum += x[j] * w1[i][j];
+    }
+    a1[i] = sum > 0 ? sum : 0; // ReLU activation
+}
+
+// Layer 2: hidden -> hidden
+for (int i = 0; i < 32; i++) {
+    float sum = b2[i];
+    for (int j = 0; j < 32; j++) {
+        sum += a1[j] * w2[i][j];
+    }
+    a2[i] = sum > 0 ? sum : 0;
+}
+
+// Layer 3: hidden -> hidden
+for (int i = 0; i < 32; i++) {
+    float sum = b3[i];
+    for (int j = 0; j < 32; j++) {
+        sum += a2[j] * w3[i][j];
+    }
+    a3[i] = sum > 0 ? sum : 0;
+}
+
+// Output layer: hidden -> result
+float sum = bout[0];
+for (int j = 0; j < 32; j++) {
+    sum += a3[j] * wout[0][j];
+}
+float raw_output = sum;
+float real_output = raw_output * y_std + y_mean;
+            </pre>
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                This is the exact structure of the calculator logic. The only differences are the array sizes and the model values.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">💾 5. C-style training loop</div>
+            <div class="explanation-box">
+                Training is the process of adjusting the weight arrays so the predictions get closer to the correct answers.
+                Here is a simple C-style sketch of the same training steps the Python script takes.
+            </div>
+            <pre class="code-block">
+for (int epoch = 0; epoch < 20000; epoch++) {
+    // 1. Forward pass: compute prediction for all examples
+    float y_pred[N][1];
+    for (int i = 0; i < N; i++) {
+        y_pred[i][0] = model_forward(X[i]);
+    }
+
+    // 2. Compute loss: mean squared error
+    float loss = 0;
+    for (int i = 0; i < N; i++) {
+        float diff = y_pred[i][0] - Y_norm[i][0];
+        loss += diff * diff;
+    }
+    loss /= N;
+
+    // 3. Backward pass: compute gradients for each weight and bias
+    compute_gradients(X, Y_norm, y_pred, grads);
+
+    // 4. Update weights: move values slightly in the right direction
+    for (int j = 0; j < num_weights; j++) {
+        weights[j] -= learning_rate * grads[j];
+    }
+}
+            </pre>
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                The details of gradient calculation are hidden inside <code>compute_gradients()</code>, but the important part is the loop: predict, measure error, and update.
+                In <code>train.py</code>, this happens with PyTorch calls such as <code>outputs = model_full(X)</code>, <code>loss.backward()</code>, and <code>optimizer.step()</code>.
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🌳 6. One tree vs. a whole forest</div>
+            <div class="explanation-box">
+                A decision tree follows rules like an if/else chain. A random forest combines many trees to reduce mistakes.
+                Neural networks are different: they learn numbers, not rules.
+            </div>
+            <div class="interactive-demo">
+                <div class="slider-label">
+                    <span>Number of Trees in Forest:</span>
+                    <span id="tree-count-val">1</span>
+                </div>
+                <input type="range" id="tree-slider" min="1" max="20" value="1">
+
+                <div class="tree-container" id="tree-display">
+                    <span class="tree-icon">🌳</span>
+                </div>
+
+                <p style="text-align: center; font-size: 0.9rem; margin-top: 15px;">
+                    With more trees, the forest is more stable. One tree may overfit, but a forest averages the opinions.
+                </p>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">📐 5. The power of matrix size</div>
+            <div class="explanation-box">
+                The calculator model uses 32 neurons in each hidden layer. More neurons means more connections and more ability to represent complex math.
+            </div>
+            <div class="interactive-demo">
+                <div class="slider-label">
+                    <span>Neurons per Layer:</span>
+                    <span id="neuron-count-val">4</span>
+                </div>
+                <input type="range" id="neuron-slider" min="2" max="12" value="4">
+
+                <div class="slider-label" style="margin-top: 15px;">
+                    <span>Number of Hidden Layers:</span>
+                    <span id="layer-count-val">1</span>
+                </div>
+                <input type="range" id="layer-slider" min="1" max="5" value="1">
+
+                <div class="matrix-viz" id="network-viz"></div>
+
+                <p style="text-align: center; font-size: 0.9rem;">
+                    Total Connections: <span class="stat-badge" id="conn-count">0</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">🔢 6. Speaking numerically</div>
+            <div class="explanation-box">
+                One-hot encoding avoids false order. The calculator uses one-hot for its operators so each symbol is independent.
+            </div>
+            <div class="interactive-demo">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <label>Categories (Colors):</label>
+                    <code style="color: var(--accent);">[Red, Green, Blue, Yellow, Purple]</code>
+                </div>
+                <div class="timeline-controls" style="justify-content: center;">
+                    <button class="timeline-btn active" id="btn-label">Label Encoding</button>
+                    <button class="timeline-btn" id="btn-onehot">One-Hot Encoding</button>
+                </div>
+                <div id="encoding-display" style="text-align: center; padding: 20px;"></div>
+                <p style="text-align: center; font-size: 0.9rem;" id="encoding-insight">
+                    Cells used per data point: <span class="stat-badge">1</span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+    <script src="concepts.js"></script>
+</body>
+</html>

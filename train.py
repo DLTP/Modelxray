@@ -121,9 +121,10 @@ def train():
     # -------------------------------------------------------
     # PHASE 2: Full training from scratch for the main model
     # -------------------------------------------------------
-    print("\n=== PHASE 2: Full training (fresh model, 20000 epochs) ===")
+    print("\n=== PHASE 2: Full training (fresh model, 20,000 epochs) ===")
     
-    # Normalize outputs so the network doesn't struggle with range 0-400
+    # Normalize outputs so the network doesn't learn from raw result scale.
+    # Normalization helps the model train faster and more reliably.
     y_mean = Y.mean()
     y_std = Y.std()
     Y_norm = (Y - y_mean) / y_std
@@ -202,7 +203,7 @@ def train():
                 **snapshot_row2
             },
             "final": {
-                "label": "After Full Training (10,000 rows × 15,000 epochs)",
+                "label": "After Full Training (10,000 rows × 20,000 epochs)",
                 "description": "After seeing the entire dataset thousands of times, the weights have sculpted themselves into a precise calculator. Compare these to the random initial values above!",
                 **snapshot_final
             }
